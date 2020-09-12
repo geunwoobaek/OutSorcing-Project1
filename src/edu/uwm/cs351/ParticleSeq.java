@@ -72,10 +72,13 @@ public class ParticleSeq implements Cloneable
 		// 2. The data array is at least as long as the number of items
 		//    claimed by the sequence.
 		// TODO
+		if (_data.length<_manyItems) return _report("The data array is at least as long as the number of items");
 
 		// 3. currentIndex is never negative and never more than the number of
 		//    items claimed by the sequence.
 		// TODO
+		if(_currentIndex < 0 || _currentIndex > _manyItems) 
+			return _report("currentIndex is never negative and never more than the number of items claimed by the sequence.");
 
 		// 4. if isCurrent is true, then current index must be a valid index
 		//    (it cannot be equal to the number of items)
@@ -102,6 +105,10 @@ public class ParticleSeq implements Cloneable
 		// NB: NEVER assert the invariant at the START of the constructor.
 		// (Why not?  Think about it.)
 		// TODO: Implement this code.
+		
+		
+		_data = new Particle[INITIAL_CAPACITY];
+		//this(INITIAL_CAPACITY);
 		assert _wellFormed() : "Invariant false at end of constructor";
 	}
 
@@ -125,6 +132,10 @@ public class ParticleSeq implements Cloneable
 	public ParticleSeq(int initialCapacity)
 	{
 		// TODO: Implement this code.
+		if(initialCapacity < 0) throw new IllegalArgumentException();	
+		
+		_data = new Particle[initialCapacity];
+		_manyItems = _currentIndex = 0;
 		assert _wellFormed() : "Invariant false at end of constructor";
 	}
 
@@ -138,7 +149,8 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of size";
 		// TODO: Implement this code.
-		return 0;
+		return _manyItems;
+		
 		// size() should not modify anything, so we omit testing the invariant at the end
 	}
 
@@ -154,6 +166,8 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of start";
 		// TODO: Implement this code.
+		_currentIndex = 0;
+		
 		assert _wellFormed() : "invariant failed at end of start";
 	}
 
@@ -169,7 +183,9 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of isCurrent";
 		// TODO: Implement this code.
-		return false;
+		if(_currentIndex >= _manyItems) return false;
+		else return true;
+				
 	}
 
 	/**
@@ -187,7 +203,9 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of getCurrent";
 		// TODO: Implement this code.
-		return null;
+		if(!isCurrent()) throw new IllegalStateException();			
+		return _data[_currentIndex];		
+		
 	}
 
 	/**
@@ -205,7 +223,8 @@ public class ParticleSeq implements Cloneable
 	public boolean atEnd() {
 		assert _wellFormed() : "Invariant failed at start of atEnd";
 		// TODO: Implement this code
-		return false;
+		return (_currentIndex == _manyItems);
+		
 		// Our solution makes use of no conditionals (if/while/for/&&/||).
 	}
 	
@@ -227,6 +246,10 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of advance";
 		// TODO: Implement this code.
+		if(!isCurrent()) throw new IllegalStateException();	
+		
+		if(!atEnd()) _currentIndex++;
+		
 		assert _wellFormed() : "invariant failed at end of advance";
 	}
 
@@ -248,6 +271,15 @@ public class ParticleSeq implements Cloneable
 		assert _wellFormed() : "invariant failed at start of removeCurrent";
 		// TODO: Implement this code.
 		// You will need to shift elements in the array.
+		if(!isCurrent()) throw new IllegalStateException();	
+		--_manyItems;
+		if(isCurrent() && !atEnd()) {
+			for(int i = _currentIndex; i<_manyItems; ++i) {
+				_data[i] = _data[i+1];
+			}
+		}
+		
+		
 		assert _wellFormed() : "invariant failed at end of removeCurrent";
 	}
 
@@ -274,6 +306,13 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of addBefore";
 		// TODO: Implement this code.
+		++_manyItems;
+		if(isCurrent()) {
+			_data[_currentIndex] = element;
+			for(int i = _currentIndex; i<_manyItems; ++i) {
+				_data[i+1] = _data[i];
+			}
+		}
 		assert _wellFormed() : "invariant failed at end of addBefore";
 	}
 
