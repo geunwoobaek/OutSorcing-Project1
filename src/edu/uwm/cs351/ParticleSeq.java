@@ -183,8 +183,7 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of isCurrent";
 		// TODO: Implement this code.
-		if(_currentIndex >= _manyItems) return false;
-		else return true;
+		return _currentIndex < _manyItems;
 				
 	}
 
@@ -246,9 +245,9 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of advance";
 		// TODO: Implement this code.
-		if(!isCurrent()) throw new IllegalStateException();	
+		if(atEnd()) throw new IllegalStateException();	
 		
-		if(!atEnd()) _currentIndex++;
+		 _currentIndex++;
 		
 		assert _wellFormed() : "invariant failed at end of advance";
 	}
@@ -273,10 +272,9 @@ public class ParticleSeq implements Cloneable
 		// You will need to shift elements in the array.
 		if(!isCurrent()) throw new IllegalStateException();	
 		--_manyItems;
-		if(isCurrent() && !atEnd()) {
-			for(int i = _currentIndex; i<_manyItems; ++i) {
-				_data[i] = _data[i+1];
-			}
+		for (int i=_currentIndex; i < _manyItems; ++i) {
+			_data[i] = _data[i+1];
+		
 		}
 		
 		
@@ -306,13 +304,15 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of addBefore";
 		// TODO: Implement this code.
-		++_manyItems;
-		if(isCurrent()) {
-			_data[_currentIndex] = element;
-			for(int i = _currentIndex; i<_manyItems; ++i) {
-				_data[i+1] = _data[i];
-			}
+		ensureCapacity(_manyItems+1);
+		int i;
+		for(i = _manyItems-1; i>_currentIndex-1; --i ) {
+			_data[i+1] = _data[i];						
 		}
+		
+		_data[_currentIndex] = element;
+		++_manyItems;
+		
 		assert _wellFormed() : "invariant failed at end of addBefore";
 	}
 
@@ -340,6 +340,15 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of addAfter";
 		// TODO: Implement this code.
+		ensureCapacity(_manyItems+1);
+		
+		int i;
+		for(i = _manyItems-1; i>_currentIndex; --i ) {
+			_data[i+1] = _data[i];
+		}
+		_currentIndex = i+1;		
+		_data[_currentIndex] = element;
+		++_manyItems;
 		assert _wellFormed() : "invariant failed at end of addAfter";
 	}
 
@@ -389,7 +398,22 @@ public class ParticleSeq implements Cloneable
 	{
 		// TODO: Implement this code.
 		// This is a private method: don't check invariants
-	}
+		
+		if(_data.length >= minimumCapacity) return;
+		
+		int newCap = _data.length*2;
+		if(newCap < minimumCapacity) newCap = minimumCapacity;
+		Particle[] newData = new Particle[newCap]; 
+		
+		for(int i = 0; i<_manyItems; i++) {
+			newData[i] = _data[i];
+		}
+		_data = newData;
+		
+		}
+		
+		
+	
 
 	/**
 	 * Generate a copy of this sequence.
