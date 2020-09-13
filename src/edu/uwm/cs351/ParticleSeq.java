@@ -53,7 +53,8 @@ public class ParticleSeq implements Cloneable
 	private int _manyItems;
 	private boolean _isCurrent;
 	private int _currentIndex; 
-
+	
+		
 	private static int INITIAL_CAPACITY = 1;
 
 	private static boolean _doReport = true; // changed only by invariant tester
@@ -108,7 +109,8 @@ public class ParticleSeq implements Cloneable
 		
 		
 		_data = new Particle[INITIAL_CAPACITY];
-		//this(INITIAL_CAPACITY);
+		_manyItems = _currentIndex = 0;
+		
 		assert _wellFormed() : "Invariant false at end of constructor";
 	}
 
@@ -183,8 +185,10 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of isCurrent";
 		// TODO: Implement this code.
-		return _currentIndex < _manyItems;
-				
+		
+		if(_currentIndex < _manyItems) _isCurrent = true;
+		if(_currentIndex >= _manyItems) _isCurrent = false;
+		return _isCurrent;
 	}
 
 	/**
@@ -245,7 +249,7 @@ public class ParticleSeq implements Cloneable
 	{
 		assert _wellFormed() : "invariant failed at start of advance";
 		// TODO: Implement this code.
-		if(atEnd()) throw new IllegalStateException();	
+		if(atEnd()) throw new IllegalStateException();
 		
 		 _currentIndex++;
 		
@@ -271,7 +275,9 @@ public class ParticleSeq implements Cloneable
 		// TODO: Implement this code.
 		// You will need to shift elements in the array.
 		if(!isCurrent()) throw new IllegalStateException();	
+		
 		--_manyItems;
+		
 		for (int i=_currentIndex; i < _manyItems; ++i) {
 			_data[i] = _data[i+1];
 		
@@ -305,8 +311,8 @@ public class ParticleSeq implements Cloneable
 		assert _wellFormed() : "invariant failed at start of addBefore";
 		// TODO: Implement this code.
 		ensureCapacity(_manyItems+1);
-		int i;
-		for(i = _manyItems-1; i>_currentIndex-1; --i ) {
+		
+		for(int i = _manyItems-1; i>_currentIndex-1; --i ) {
 			_data[i+1] = _data[i];						
 		}
 		
@@ -346,7 +352,7 @@ public class ParticleSeq implements Cloneable
 		for(i = _manyItems-1; i>_currentIndex; --i ) {
 			_data[i+1] = _data[i];
 		}
-		_currentIndex = i+1;		
+		_currentIndex = 1 + i ;		
 		_data[_currentIndex] = element;
 		++_manyItems;
 		assert _wellFormed() : "invariant failed at end of addAfter";
@@ -377,6 +383,12 @@ public class ParticleSeq implements Cloneable
 		assert _wellFormed() : "invariant failed at start of addAll";
 		// TODO: Implement this code.
 		// Recall that you can freely access private fields of the addend.
+		ensureCapacity(_manyItems+addend._manyItems);
+		for (int i=0; i < addend._manyItems; ++i) {
+			_data[_manyItems + i] = addend._data[i];
+		}
+		if (_currentIndex == _manyItems) _currentIndex += addend._manyItems;
+		_manyItems += addend._manyItems;
 		assert _wellFormed() : "invariant failed at end of addAll";
 	}   
 
